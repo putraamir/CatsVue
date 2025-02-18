@@ -50,17 +50,19 @@ const searchCat = () => {
 }
 
 .search-button {
-  padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid hsla(160, 100%, 37%, 1);
+  background-color: var(--color-background-soft);
+  color: hsla(160, 100%, 37%, 1);
   cursor: pointer;
   font-size: 16px;
+  transition-duration: 150ms;
 }
 
 .search-button:hover {
-  background-color: #45a049;
+  color: white;
+  background-color: hsla(160, 100%, 37%, 0.5);
 }
 
 .error {
