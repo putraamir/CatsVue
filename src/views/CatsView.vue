@@ -30,14 +30,15 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
                     <h2 class="cat-name">{{ cat.name }}</h2>
 
                     <div class="cat-info">
-                        <p><strong>Origin:</strong> {{ cat.origin }}</p>
-                        <p><strong>Size:</strong> {{ cat.length }}</p>
-                        <p><strong>Weight:</strong> {{ cat.min_weight }} - {{ cat.max_weight }} lbs</p>
-                        <p><strong>Life Expectancy:</strong> {{ cat.min_life_expectancy }} - {{ cat.max_life_expectancy
-                        }} years</p>
+                        <p><strong class="green">Origin:</strong> {{ cat.origin }}</p>
+                        <p><strong class="green">Size:</strong> {{ cat.length }}</p>
+                        <p><strong class="green">Weight:</strong> {{ cat.min_weight }} - {{ cat.max_weight }} lbs</p>
+                        <p><strong class="green">Life Expectancy:</strong> {{ cat.min_life_expectancy }} - {{
+                            cat.max_life_expectancy
+                            }} years</p>
                     </div>
                     <!-- <router-link :to="'/cats/' + cat.id" class="view-details-button">View Details</router-link> -->
-                    <router-link :to="'/cats/' + cat.name">View Details</router-link>
+                    <router-link :to="'/cats/' + cat.name" class="btn">View Details</router-link>
                 </div>
             </div>
         </div>
@@ -55,6 +56,7 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 2rem;
+    margin-right: 2rem;
 }
 
 .loader {
@@ -76,6 +78,7 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
     width: 100%;
     height: 200px;
     object-fit: cover;
+    margin: 0;
 }
 
 .cat-content {
@@ -96,7 +99,13 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
     margin: 0.5rem 0;
 }
 
-.cat-info strong {
-    color: var(--color-heading);
+.btn {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid hsla(160, 100%, 37%, 1);
+}
+
+.btn:hover {
+    color: white;
 }
 </style>
