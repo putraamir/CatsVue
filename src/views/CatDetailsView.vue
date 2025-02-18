@@ -17,7 +17,7 @@ axios.get('https://api.api-ninjas.com/v1/cats?name=' + catName, {
     if (response.data.length === 0)
         router.push({ path: '/', query: { message: "No cats found by the name '" + catName + "'" } })
 
-    catInfo.value = response.data
+    catInfo.value = response.data[0]
 }).catch((error) => {
     console.error(error)
 });
@@ -25,56 +25,63 @@ axios.get('https://api.api-ninjas.com/v1/cats?name=' + catName, {
 
 <template>
     <main>
-        <div v-if="catInfo && catInfo[0]" class="cat-details">
-            <div class="image-container"><img :src="catInfo[0].image_link" :alt="catInfo[0].name" class="cat-image">
+        <div v-if="catInfo && catInfo" class="cat-details">
+            <!-- Image -->
+            <div class="image-container">
+                <img :src="catInfo.image_link" :alt="catInfo.name" class="cat-image">
             </div>
-            <h1>{{ catInfo[0].name }}</h1>
 
+            <!-- Name -->
+            <h1>{{ catInfo.name }}</h1>
+
+            <!-- Info -->
             <div class="info-grid">
-                <p><strong class="green">Origin:</strong> {{ catInfo[0].origin }}</p>
-                <p><strong class="green">Size:</strong> {{ catInfo[0].length }}</p>
-                <p><strong class="green">Weight:</strong> {{ catInfo[0].min_weight }} - {{ catInfo[0].max_weight }} lbs
+                <p><strong class="green">Origin:</strong> {{ catInfo.origin }}</p>
+                <p><strong class="green">Size:</strong> {{ catInfo.length }}</p>
+                <p><strong class="green">Weight:</strong> {{ catInfo.min_weight }} - {{ catInfo.max_weight }} lbs
                 </p>
-                <p><strong class="green">Life Expectancy:</strong> {{ catInfo[0].min_life_expectancy }} - {{
-                    catInfo[0].max_life_expectancy }} years</p>
+                <p><strong class="green">Life Expectancy:</strong> {{ catInfo.min_life_expectancy }} - {{
+                    catInfo.max_life_expectancy }} years</p>
             </div>
 
+            <!-- Ratings -->
             <div class="ratings">
                 <div class="rating">
                     <span>🧑🏻‍🧑🏻‍🧒🏻 Family Friendly</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].family_friendly) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.family_friendly) }}</div>
                 </div>
                 <div class="rating">
                     <span>👶🏻 Children Friendly</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].children_friendly) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.children_friendly) }}</div>
                 </div>
                 <div class="rating">
                     <span>🧠 Intelligence</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].intelligence) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.intelligence) }}</div>
                 </div>
                 <div class="rating">
                     <span>🧹 Shedding</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].shedding) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.shedding) }}</div>
                 </div>
                 <div class="rating">
                     <span>🪮 Grooming</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].grooming) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.grooming) }}</div>
                 </div>
                 <div class="rating">
                     <span>❤️ General Health</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].general_health) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.general_health) }}</div>
                 </div>
                 <div class="rating">
                     <span>🛝 Playfulness</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].playfulness) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.playfulness) }}</div>
                 </div>
                 <div class="rating">
                     <span>🐶 Other Pets Friendly</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo[0].other_pets_friendly) }}</div>
+                    <div class="stars">{{ "⭐".repeat(catInfo.other_pets_friendly) }}</div>
                 </div>
             </div>
         </div>
 
+        <!-- Loading -->
         <div v-else class="loader">
             <p>Loading...</p>
         </div>

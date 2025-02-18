@@ -6,25 +6,29 @@ import axios from 'axios';
 const route = useRoute();
 const router = useRouter();
 const searchQuery = ref('');
+
+//Get error message from parameter or set to ''
 const error = ref(route.query.message || '');
 
+//Search cat function
 const searchCat = () => {
-  if (searchQuery.value) {
+  //If searchQuery has a value, push to the cat details page, else set error message
+  if (searchQuery.value)
     router.push(`/cats/${searchQuery.value}`);
-  } else {
+  else
     error.value = 'Please enter a cat name';
-  }
 };
 
 const catNames = ref(null);
 
 //Using parameter min_weight=1 to get all cats since the https://api.api-ninjas.com/v1/allcats requires Premium Subscription
-axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1&offset=50', {
+axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
   headers: {
     'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY,
   },
 })
   .then((response) => {
+    //Just get the name of the cats
     catNames.value = response.data.map((cat) => cat.name);
   })
   .catch((error) => {
@@ -33,7 +37,10 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1&offset=50', {
 
 // Add computed property for filtered suggestions
 const suggestions = computed(() => {
+  //If searchQuery has no value, return empty array
   if (!searchQuery.value) return [];
+
+  //Filter catNames based on searchQuery
   return catNames.value?.filter(name =>
     name.toLowerCase().includes(searchQuery.value.toLowerCase())
   ) || [];
@@ -52,6 +59,7 @@ const selectSuggestion = (name: string) => {
 
     <h2>Hey Cat Lover! Are you looking for a specific cat breed?</h2>
 
+    <!-- Search Input -->
     <div class="search-container">
       <div class="search-wrapper">
         <input v-model="searchQuery" type="text" placeholder="Search for a cat" class="search-input" />
@@ -59,6 +67,8 @@ const selectSuggestion = (name: string) => {
           Search
         </button>
       </div>
+
+      <!-- Suggestions List -->
       <ul v-if="suggestions.length" class="suggestions-list">
         <li v-for="suggestion in suggestions" :key="suggestion" @click="selectSuggestion(suggestion)"
           class="suggestion-item">
@@ -66,6 +76,8 @@ const selectSuggestion = (name: string) => {
         </li>
       </ul>
     </div>
+
+    <!-- Error -->
     <p class="error">{{ error }}</p>
   </main>
 </template>

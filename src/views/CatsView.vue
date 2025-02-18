@@ -8,6 +8,7 @@ const loading = ref(true);
 
 const fetchMoreCats = () => {
     loading.value = true;
+
     //Need to use parameter min_weight=1 to get all cats since the https://api.api-ninjas.com/v1/allcats requires Premium Subscription
     axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1&offset=' + offset.value, {
         headers: {
@@ -15,11 +16,13 @@ const fetchMoreCats = () => {
         }
     })
         .then(response => {
+            // If cats is null, set it to the response data, otherwise append the response data to the existing cats
             if (!cats.value)
                 cats.value = response.data;
             else
                 cats.value = [...cats.value, ...response.data];
 
+            // Since the api only returns at most 20 cats, we need to increment the offset by 20 to get the next set of cats
             offset.value += 20;
             loading.value = false;
         })
@@ -28,6 +31,7 @@ const fetchMoreCats = () => {
         })
 }
 
+// Fetch the first set of cats
 fetchMoreCats();
 </script>
 
@@ -35,6 +39,7 @@ fetchMoreCats();
     <main>
         <h1>Cats List</h1>
 
+        <!-- Cat List -->
         <div v-if="cats" class="cats-grid">
             <div v-for="cat in cats" :key="cat.name" class="cat-card">
                 <img :src="cat.image_link" :alt="cat.name" class="cat-image" style="display: block;" />
@@ -49,20 +54,20 @@ fetchMoreCats();
                             cat.max_life_expectancy
                         }} years</p>
                     </div>
-                    <!-- <router-link :to="'/cats/' + cat.id" class="view-details-button">View Details</router-link> -->
+
                     <router-link :to="'/cats/' + cat.name" class="btn">View Details</router-link>
                 </div>
             </div>
 
         </div>
-        <div v-else-if="error">
-            <pre>{{ error }}</pre>
-        </div>
+
+        <!-- Loading -->
         <div v-else class="loader">
             <p>Loading...</p>
         </div>
 
-        <div v-if="cats" class="seeMore">
+        <!-- See More Button -->
+        <div v-if="cats" class="seeMoreContainer">
             <button @click="fetchMoreCats" class="btn">{{ loading ? "Loading..." : "See More" }}</button>
         </div>
     </main>
@@ -116,7 +121,7 @@ fetchMoreCats();
     margin: 0.5rem 0;
 }
 
-.seeMore {
+.seeMoreContainer {
     width: 100%;
     height: 100px;
     display: flex;
