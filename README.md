@@ -37,3 +37,7 @@ npm run build
 ```sh
 npm run lint
 ```
+
+### Env
+
+add api ninjas api key
