@@ -32,7 +32,7 @@ axios.get('https://api.api-ninjas.com/v1/cats?name=' + catName, {
 
             <div class="info-grid">
                 <p><strong class="green">Origin:</strong> {{ catInfo[0].origin }}</p>
-                <p><strong class="green">Length:</strong> {{ catInfo[0].length }}</p>
+                <p><strong class="green">Size:</strong> {{ catInfo[0].length }}</p>
                 <p><strong class="green">Weight:</strong> {{ catInfo[0].min_weight }} - {{ catInfo[0].max_weight }} lbs
                 </p>
                 <p><strong class="green">Life Expectancy:</strong> {{ catInfo[0].min_life_expectancy }} - {{

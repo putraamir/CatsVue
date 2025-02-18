@@ -2,21 +2,33 @@
 import axios from 'axios'
 import { ref } from 'vue'
 
-const cats = ref(null)
+const cats = ref(null);
+const offset = ref(0);
+const loading = ref(true);
 
-//Using parameter min_weight=1 to get all cats since the https://api.api-ninjas.com/v1/allcats requires Premium Subscription
-axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
-    headers: {
-        'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY
-    }
-})
-    .then(response => {
-        cats.value = response.data
+const fetchMoreCats = () => {
+    loading.value = true;
+    //Need to use parameter min_weight=1 to get all cats since the https://api.api-ninjas.com/v1/allcats requires Premium Subscription
+    axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1&offset=' + offset.value, {
+        headers: {
+            'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY
+        }
     })
-    .catch(error => {
-        console.error(error)
-    })
+        .then(response => {
+            if (!cats.value)
+                cats.value = response.data;
+            else
+                cats.value = [...cats.value, ...response.data];
 
+            offset.value += 20;
+            loading.value = false;
+        })
+        .catch(error => {
+            console.error(error)
+        })
+}
+
+fetchMoreCats();
 </script>
 
 <template>
@@ -35,18 +47,23 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
                         <p><strong class="green">Weight:</strong> {{ cat.min_weight }} - {{ cat.max_weight }} lbs</p>
                         <p><strong class="green">Life Expectancy:</strong> {{ cat.min_life_expectancy }} - {{
                             cat.max_life_expectancy
-                            }} years</p>
+                        }} years</p>
                     </div>
                     <!-- <router-link :to="'/cats/' + cat.id" class="view-details-button">View Details</router-link> -->
                     <router-link :to="'/cats/' + cat.name" class="btn">View Details</router-link>
                 </div>
             </div>
+
         </div>
         <div v-else-if="error">
             <pre>{{ error }}</pre>
         </div>
         <div v-else class="loader">
             <p>Loading...</p>
+        </div>
+
+        <div v-if="cats" class="seeMore">
+            <button @click="fetchMoreCats" class="btn">{{ loading ? "Loading..." : "See More" }}</button>
         </div>
     </main>
 </template>
@@ -99,13 +116,12 @@ axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
     margin: 0.5rem 0;
 }
 
-.btn {
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid hsla(160, 100%, 37%, 1);
-}
-
-.btn:hover {
-    color: white;
+.seeMore {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 </style>
