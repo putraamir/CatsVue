@@ -1,14 +1,40 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import { catService } from '@/services/catService';
 
 const route = useRoute();
 const router = useRouter();
 const searchQuery = ref('');
+const catNames = ref([]);
 
 //Get error message from parameter or set to ''
 const error = ref(route.query.message || '');
+
+// Get cat names
+catService.getCatNames()
+  .then(names => {
+    catNames.value = names;
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+const suggestions = computed<string[]>(() => {
+  //If searchQuery has no value, return empty array
+  if (!searchQuery.value) return [];
+
+  //Filter catNames based on searchQuery
+  return catNames.value.filter((name: string) =>
+    name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  ) || [];
+});
+
+// Add function to handle suggestion selection
+const selectSuggestion = (name: string) => {
+  searchQuery.value = name;
+  router.push(`/cats/${name}`);
+};
 
 //Search cat function
 const searchCat = () => {
@@ -19,38 +45,6 @@ const searchCat = () => {
     error.value = 'Please enter a cat name';
 };
 
-const catNames = ref(null);
-
-//Using parameter min_weight=1 to get all cats since the https://api.api-ninjas.com/v1/allcats requires Premium Subscription
-axios.get('https://api.api-ninjas.com/v1/cats?min_weight=1', {
-  headers: {
-    'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY,
-  },
-})
-  .then((response) => {
-    //Just get the name of the cats
-    catNames.value = response.data.map((cat) => cat.name);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-
-// Add computed property for filtered suggestions
-const suggestions = computed(() => {
-  //If searchQuery has no value, return empty array
-  if (!searchQuery.value) return [];
-
-  //Filter catNames based on searchQuery
-  return catNames.value?.filter(name =>
-    name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  ) || [];
-});
-
-// Add function to handle suggestion selection
-const selectSuggestion = (name: string) => {
-  searchQuery.value = name;
-  router.push(`/cats/${name}`);
-};
 </script>
 
 <template>

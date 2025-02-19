@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { catService } from '@/services/catService';
+import type { Cat } from '../../types';
 
-const route = useRoute()
-const router = useRouter()
-const catName = route.params.id
-const catInfo = ref(null)
+const route = useRoute();
+const router = useRouter();
+const catName = route.params.id;
+const catInfo = ref<Cat>();
 
-axios.get('https://api.api-ninjas.com/v1/cats?name=' + catName, {
-    headers: {
-        'X-Api-Key': import.meta.env.VITE_API_NINJAS_KEY
-    }
-}).then((response) => {
-    if (response.data.length === 0)
-        router.push({ path: '/', query: { message: "No cats found by the name '" + catName + "'" } })
+catService.getCatByName(catName as string)
+    .then(response => {
+        if (!response.data.length)
+            router.push({ path: '/', query: { message: `No cats found by the name '${catName}'` } });
 
-    catInfo.value = response.data[0]
-}).catch((error) => {
-    console.error(error)
-});
+        catInfo.value = response.data[0] as Cat;
+    })
+    .catch(error => {
+        console.error(error);
+    });
 </script>
 
 <template>
     <main>
-        <div v-if="catInfo && catInfo" class="cat-details">
+        <div v-if="catInfo" class="cat-details">
             <!-- Image -->
             <div class="image-container">
                 <img :src="catInfo.image_link" :alt="catInfo.name" class="cat-image">
