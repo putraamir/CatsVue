@@ -1,12 +1,19 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
+import { useCatStore } from './stores/CatStore';
+
+onMounted(async () => {
+  const catStore = useCatStore();
+  await catStore.fetchAllCats();
+})
 </script>
 
 <template>
-  <header>
-    <nav>
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/cats">Cats</RouterLink>
+  <header class="leading-4 max-h-[100vh]">
+    <nav class="flex flex-col text-xs text-center pt-6 gap-3 pr-8 w-36">
+      <RouterLink to="/" class="text-xl">Home</RouterLink>
+      <RouterLink to="/cats" class="text-xl">Cats</RouterLink>
     </nav>
   </header>
 
@@ -14,50 +21,23 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
 nav a.router-link-exact-active {
   color: var(--color-text);
 }
 
 nav a.router-link-exact-active:hover {
   background-color: transparent;
+  letter-spacing: normal;
 }
 
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-border);
+  text-align: left;
 }
 
 nav a:first-of-type {
   border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    flex-direction: column;
-    place-items: top;
-  }
-
-  nav {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    font-size: 1rem;
-    padding: 1rem 1rem;
-    margin-top: 1rem;
-  }
 }
 </style>

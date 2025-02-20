@@ -1,156 +1,75 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { catService } from '@/services/catService';
-import type { Cat } from '../../types';
+import { useRoute } from 'vue-router';
+import { useCatStore } from '@/stores/CatStore';
 
 const route = useRoute();
-const router = useRouter();
 const catName = route.params.id;
-const catInfo = ref<Cat>();
+const catInfo = useCatStore().getCat(catName as string);
 
-catService.getCatByName(catName as string)
-    .then(response => {
-        if (!response.data.length)
-            router.push({ path: '/', query: { message: `No cats found by the name '${catName}'` } });
-
-        catInfo.value = response.data[0] as Cat;
-    })
-    .catch(error => {
-        console.error(error);
-    });
 </script>
 
 <template>
-    <main>
-        <div v-if="catInfo" class="cat-details">
-            <!-- Image -->
-            <div class="image-container">
-                <img :src="catInfo.image_link" :alt="catInfo.name" class="cat-image">
-            </div>
+    <main class="min-h-screen bg-[var(--color-background)] py-8">
+        <div v-if="catInfo" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Left Column -->
+                <div class="flex flex-col gap-6">
+                    <!-- Image -->
+                    <div class="relative group overflow-hidden rounded-2xl shadow-xl">
+                        <img :src="catInfo.image_link" :alt="catInfo.name"
+                            class="w-full aspect-square object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    </div>
 
-            <!-- Name -->
-            <h1>{{ catInfo.name }}</h1>
+                    <!-- Basic Info Card -->
+                    <div class="bg-[var(--color-background-soft)] p-6 rounded-xl shadow-lg flex flex-col gap-3">
+                        <h1 class="text-4xl font-bold mb-6 text-[var(--color-heading)]">{{ catInfo.name }}</h1>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-emerald-500">Origin</span>
+                                <span>{{ catInfo.origin }}</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-emerald-500">Size</span>
+                                <span>{{ catInfo.length }}</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-emerald-500">Weight</span>
+                                <span>{{ catInfo.min_weight }} - {{ catInfo.max_weight }} lbs</span>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-emerald-500">Life Expectancy</span>
+                                <span>{{ catInfo.min_life_expectancy }} - {{ catInfo.max_life_expectancy }} years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Info -->
-            <div class="info-grid">
-                <p><strong class="green">Origin:</strong> {{ catInfo.origin }}</p>
-                <p><strong class="green">Size:</strong> {{ catInfo.length }}</p>
-                <p><strong class="green">Weight:</strong> {{ catInfo.min_weight }} - {{ catInfo.max_weight }} lbs
-                </p>
-                <p><strong class="green">Life Expectancy:</strong> {{ catInfo.min_life_expectancy }} - {{
-                    catInfo.max_life_expectancy }} years</p>
-            </div>
-
-            <!-- Ratings -->
-            <div class="ratings">
-                <div class="rating">
-                    <span>🧑🏻‍🧑🏻‍🧒🏻 Family Friendly</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.family_friendly) }}</div>
-                </div>
-                <div class="rating">
-                    <span>👶🏻 Children Friendly</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.children_friendly) }}</div>
-                </div>
-                <div class="rating">
-                    <span>🧠 Intelligence</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.intelligence) }}</div>
-                </div>
-                <div class="rating">
-                    <span>🧹 Shedding</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.shedding) }}</div>
-                </div>
-                <div class="rating">
-                    <span>🪮 Grooming</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.grooming) }}</div>
-                </div>
-                <div class="rating">
-                    <span>❤️ General Health</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.general_health) }}</div>
-                </div>
-                <div class="rating">
-                    <span>🛝 Playfulness</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.playfulness) }}</div>
-                </div>
-                <div class="rating">
-                    <span>🐶 Other Pets Friendly</span>
-                    <div class="stars">{{ "⭐".repeat(catInfo.other_pets_friendly) }}</div>
+                <!-- Right Column -->
+                <div class="bg-[var(--color-background-soft)] p-6 rounded-xl shadow-lg h-fit flex flex-col gap-3">
+                    <h2 class="text-2xl font-semibold mb-6 text-[var(--color-heading)]">Characteristics</h2>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div v-for="(rating, label) in {
+                            '🧑🏻‍🧑🏻‍🧒🏻 Family Friendly': catInfo.family_friendly,
+                            '👶🏻 Children Friendly': catInfo.children_friendly,
+                            '🧠 Intelligence': catInfo.intelligence,
+                            '🧹 Shedding': catInfo.shedding,
+                            '🪮 Grooming': catInfo.grooming,
+                            '❤️ General Health': catInfo.general_health,
+                            '🛝 Playfulness': catInfo.playfulness,
+                            '🐶 Other Pets Friendly': catInfo.other_pets_friendly
+                        }" :key="label"
+                            class="flex flex-col gap-2 p-4 bg-[var(--color-background-mute)] rounded-lg transition-all duration-300 hover:transform hover:-translate-y-1">
+                            <span class="text-sm font-medium">{{ label }}</span>
+                            <div class="text-[#FFD700] tracking-[3px] text-lg">{{ "⭐".repeat(rating) }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Loading -->
-        <div v-else class="loader">
-            <p>Loading...</p>
+        <!-- Loading State -->
+        <div v-else class="h-[50vh] flex items-center justify-center">
+            <div class="animate-pulse text-lg">Loading...</div>
         </div>
     </main>
 </template>
-
-<style scope>
-main {
-    width: 100%;
-}
-
-.loader {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    place-items: center;
-    justify-content: center;
-}
-
-.ratings {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 1rem;
-}
-
-.rating {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.rating span {
-    font-size: 0.9rem;
-    color: var(--color-text-light);
-}
-
-.stars {
-    color: #FFD700;
-    letter-spacing: 3px;
-}
-
-.cat-details {
-    width: 100%;
-    margin: 0 auto;
-    padding: 1rem;
-}
-
-.image-container {
-    width: 100%;
-    display: grid;
-    place-items: center;
-}
-
-.cat-image {
-    width: 100%;
-    max-width: 400px;
-    height: auto;
-    border-radius: 8px;
-    margin: 1rem 0;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
-}
-
-h1 {
-    text-align: center;
-    color: var(--color-heading);
-    margin: 1rem 0;
-}
-</style>

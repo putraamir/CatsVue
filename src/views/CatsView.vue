@@ -1,131 +1,123 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { catService } from '@/services/catService';
-import type { Cat } from '../../types';
+import CatCard from '@/components/CatCard.vue';
+import { useCatStore } from '@/stores/CatStore';
+import { storeToRefs } from 'pinia';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
-const cats = ref<Cat[]>([]);
-const offset = ref(0);
-const loading = ref(true);
+const catStore = useCatStore();
+const { cats, loading } = storeToRefs(catStore);
 
-const fetchMoreCats = () => {
-    loading.value = true;
-
-    catService.getAllCats(offset.value)
-        .then(response => {
-            if (!cats.value)
-                cats.value = response.data;
-            else
-                cats.value = [...cats.value, ...response.data];
-
-            offset.value += 20;
-            loading.value = false;
-        })
-        .catch(error => {
-            console.error(error);
-        });
+// Calculate optimal number of cats to show based on screen height
+const calculateShowCount = () => {
+    const screenHeight = window.innerHeight;
+    const rowHeight = 369; // height of each card in pixels
+    const headerHeight = 100; // approximate height of header + padding
+    const rows = Math.floor((screenHeight - headerHeight) / rowHeight);
+    return Math.max(rows * 5, 8); // 4 cards per row (xl breakpoint), minimum 8 cards
 };
 
-// Fetch the first set of cats
-fetchMoreCats();
+const SHOW_COUNT = ref(calculateShowCount());
+
+// Recalculate SHOW_COUNT when window is resized
+const handleResize = () => {
+    SHOW_COUNT.value = calculateShowCount();
+};
+
+onMounted(() => {
+    window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
+});
+
+const page = ref(1);
+const isInitialLoading = computed(() => loading.value && !cats.value.length);
+const hasMoreToShow = computed(() => page.value * SHOW_COUNT.value < cats.value.length);
+const hasPreviousPage = computed(() => page.value > 1);
+const visibleCats = computed(() =>
+    cats.value.slice(
+        page.value * SHOW_COUNT.value - SHOW_COUNT.value,
+        page.value * SHOW_COUNT.value
+    )
+);
+
+const nextPage = () => {
+    if (hasMoreToShow.value) {
+        page.value++;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
+
+const previousPage = () => {
+    if (hasPreviousPage.value) {
+        page.value--;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
 </script>
 
 <template>
-    <main>
-        <h1>Cats List</h1>
+    <main class="w-full h-screen overflow-y-auto">
+        <div class="flex flex-col gap-6 p-4 h-full">
+            <h1 class="text-3xl text-center">Cats List ({{ catStore.numberOfCats }})</h1>
 
-        <!-- Cat List -->
-        <div v-if="cats.length" class="cats-grid">
-            <div v-for="cat in cats" :key="cat.name" class="cat-card">
-                <img :src="cat.image_link" :alt="cat.name" class="cat-image" style="display: block;" />
-                <div class="cat-content">
-                    <h2 class="cat-name">{{ cat.name }}</h2>
-
-                    <div class="cat-info">
-                        <p><strong class="green">Origin:</strong> {{ cat.origin }}</p>
-                        <p><strong class="green">Size:</strong> {{ cat.length }}</p>
-                        <p><strong class="green">Weight:</strong> {{ cat.min_weight }} - {{ cat.max_weight }} lbs</p>
-                        <p><strong class="green">Life Expectancy:</strong> {{ cat.min_life_expectancy }} - {{
-                            cat.max_life_expectancy
-                        }} years</p>
-                    </div>
-
-                    <router-link :to="'/cats/' + cat.name" class="btn">View Details</router-link>
-                </div>
+            <!-- Loading State -->
+            <div v-if="isInitialLoading" class="flex justify-center items-center min-h-[200px]">
+                <p>Loading cats...</p>
             </div>
 
-        </div>
+            <!-- Empty State -->
+            <div v-else-if="!cats.length" class="flex justify-center items-center min-h-[200px]">
+                <p>No cats found</p>
+            </div>
 
-        <!-- Loading -->
-        <div v-else class="loader">
-            <p>Loading...</p>
-        </div>
+            <!-- Cat List -->
+            <div v-else class="flex flex-1">
+                <TransitionGroup name="fade" tag="div"
+                    class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-4 w-full grid-flow-row-dense">
+                    <CatCard v-for="cat in visibleCats" :key="cat.name" :cat="cat" class="grid-item" />
+                </TransitionGroup>
+            </div>
 
-        <!-- See More Button -->
-        <div v-if="cats" class="seeMoreContainer">
-            <button @click="fetchMoreCats" class="btn">{{ loading ? "Loading..." : "See More" }}</button>
+            <!-- Pagination Controls -->
+            <div v-if="cats.length" class="flex flex-row items-center justify-center gap-4 pb-4">
+                <button @click="previousPage" :disabled="loading || !hasPreviousPage" class="btn w-10">
+                    &lt;
+                </button>
+                <p class="text-center">
+                    Page {{ page }} of {{ Math.ceil(cats.length / SHOW_COUNT) }}
+                </p>
+
+                <button @click="nextPage" :disabled="loading || !hasMoreToShow" class="btn w-10">
+                    >
+                </button>
+            </div>
         </div>
     </main>
 </template>
 
 <style scoped>
-main {
-    overflow-y: scroll;
-    max-height: 100vh;
+.fade-enter-active {
+    transition: opacity 0.3s;
+    transition-delay: 0.3s;
 }
 
-.cats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem;
-    margin-right: 2rem;
+.fade-leave-active {
+    transition: opacity 0.3s;
 }
 
-.loader {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    place-items: center;
-    justify-content: center;
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 
-.cat-card {
-    background: var(--color-background-mute);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.grid-item {
+    align-self: start;
 }
 
-.cat-image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    margin: 0;
-}
-
-.cat-content {
-    padding: 1.5rem;
-}
-
-.cat-name {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: var(--color-heading);
-}
-
-.cat-info {
-    margin-bottom: 1.5rem;
-}
-
-.cat-info p {
-    margin: 0.5rem 0;
-}
-
-.seeMoreContainer {
-    width: 100%;
-    height: 100px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.grid {
+    align-items: start;
+    grid-auto-rows: min-content;
 }
 </style>

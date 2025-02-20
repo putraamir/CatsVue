@@ -1,4 +1,10 @@
 @import './base.css';
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Oswald';
+  src: url('./fonts/Oswald.woff2') format('woff2');
+}
 
 #app {
   display: flex;
@@ -17,6 +23,7 @@ a,
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
+    letter-spacing: 1.5px;
   }
 }
 
@@ -40,4 +47,9 @@ a,
 .btn:hover {
   color: white;
   background-color: hsla(160, 100%, 37%, 0.5);
+}
+
+btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

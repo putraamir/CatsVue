@@ -1,24 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { catService } from '@/services/catService';
+import { useCatStore } from '@/stores/CatStore';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const router = useRouter();
 const searchQuery = ref('');
-const catNames = ref([]);
+const { catNames } = storeToRefs(useCatStore());
 
 //Get error message from parameter or set to ''
 const error = ref(route.query.message || '');
-
-// Get cat names
-catService.getCatNames()
-  .then(names => {
-    catNames.value = names;
-  })
-  .catch(error => {
-    console.error(error);
-  });
 
 const suggestions = computed<string[]>(() => {
   //If searchQuery has no value, return empty array
@@ -47,82 +39,37 @@ const searchCat = () => {
 
 </script>
 
-<template>
-  <main>
-    <h1>Home</h1>
+<template class="w-screen">
+  <main class="w-full flex flex-col items-center gap-6 pt-4">
+    <h1 class="text-3xl text-center">Home</h1>
 
-    <h2>Hey Cat Lover! Are you looking for a specific cat breed?</h2>
+    <div class="flex flex-1 flex-col gap-6 justify-center items-center">
+      <h2 class="text-2xl">Hey Cat Lover! Are you looking for a specific cat breed?</h2>
 
-    <!-- Search Input -->
-    <div class="search-container">
-      <div class="search-wrapper">
-        <input v-model="searchQuery" type="text" placeholder="Search for a cat" class="search-input" />
-        <button @click="searchCat" class="btn">
-          Search
-        </button>
+      <!-- Search Input -->
+      <div class="flex flex-col gap-2.5 m-5">
+        <div class="flex gap-2">
+          <input v-model="searchQuery" type="text" placeholder="Search for a cat"
+            class="p-2 rounded-lg w-[200px] text-white bg-[color:var(--color-background-soft)]" />
+          <button @click="searchCat" class="btn">
+            Search
+          </button>
+        </div>
+
+        <!-- Suggestions List -->
+        <div class="relative">
+          <ul v-if="suggestions.length"
+            class="absolute top-full mt-1 listnone w-[200px] p-0 m-0 rounded-md bg-[color:var(--color-background-soft)] overflow-y-auto max-h-[250px]">
+            <li v-for="suggestion in suggestions" :key="suggestion" @click="selectSuggestion(suggestion)"
+              class="p-2 cursor-pointer hover:bg-[color:hsla(160,100%,37%,0.5)]">
+              {{ suggestion }}
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <!-- Suggestions List -->
-      <ul v-if="suggestions.length" class="suggestions-list">
-        <li v-for="suggestion in suggestions" :key="suggestion" @click="selectSuggestion(suggestion)"
-          class="suggestion-item">
-          {{ suggestion }}
-        </li>
-      </ul>
+      <!-- Error -->
+      <p class="text-red-500 text-sm">{{ error }}</p>
     </div>
-
-    <!-- Error -->
-    <p class="error">{{ error }}</p>
   </main>
 </template>
-
-<style scoped>
-.search-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.search-wrapper {
-  display: flex;
-  gap: 10px;
-}
-
-.search-input {
-  padding: 8px;
-  border: 2px solid var(--color-background-soft);
-  border-radius: 4px;
-  font-size: 16px;
-  width: 200px;
-  color: white;
-  background-color: var(--color-background-soft);
-}
-
-.suggestions-list {
-  list-style: none;
-  width: 200px;
-  padding: 0;
-  margin: 0;
-  border: 1px solid var(--color-background-soft);
-  border-radius: 4px;
-  background-color: var(--color-background-soft);
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.suggestion-item {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.suggestion-item:hover {
-  background-color: hsla(160, 100%, 37%, 0.5);
-}
-
-.error {
-  color: red;
-  font-size: 14px;
-  margin-top: 10px;
-}
-</style>
