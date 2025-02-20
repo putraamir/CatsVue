@@ -9,7 +9,7 @@ const catInfo = useCatStore().getCat(catName as string);
 </script>
 
 <template>
-    <main class="min-h-screen bg-[var(--color-background)] py-8">
+    <main class="page min-h-screen bg-[var(--color-background)] py-8">
         <div v-if="catInfo" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-8">
                 <!-- Left Column -->

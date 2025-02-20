@@ -53,3 +53,9 @@ btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.page {
+  position: absolute;
+  height: 100%;
+  left: 9rem;
+}

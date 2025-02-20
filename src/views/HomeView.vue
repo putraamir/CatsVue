@@ -40,7 +40,7 @@ const searchCat = () => {
 </script>
 
 <template class="w-screen">
-  <main class="w-full flex flex-col items-center gap-6 pt-4">
+  <main class="page w-full flex flex-col items-center gap-6 pt-4">
     <h1 class="text-3xl text-center">Home</h1>
 
     <div class="flex flex-1 flex-col gap-6 justify-center items-center">

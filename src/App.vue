@@ -17,7 +17,11 @@ onMounted(async () => {
     </nav>
   </header>
 
-  <RouterView />
+  <router-view v-slot="{ Component }">
+    <transition name="slideup" mode="default">
+      <component :is="Component" />
+    </transition>
+  </router-view>
 </template>
 
 <style scoped>
@@ -39,5 +43,18 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
+}
+
+.slideup-enter-active,
+.slideup-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slideup-enter-from {
+  transform: translateY(100%);
+}
+
+.slideup-leave-to {
+  transform: translateY(-100%);
 }
 </style>

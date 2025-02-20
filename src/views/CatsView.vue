@@ -58,7 +58,7 @@ const previousPage = () => {
 </script>
 
 <template>
-    <main class="w-full h-screen overflow-y-auto">
+    <main class="page h-screen overflow-y-auto">
         <div class="flex flex-col gap-6 p-4 h-full">
             <h1 class="text-3xl text-center">Cats List ({{ catStore.numberOfCats }})</h1>
 
